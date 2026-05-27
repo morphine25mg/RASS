@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMS 早期活動評估表</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#0f1117;--s1:#181c27;--s2:#1e2336;--bd:#2a3050;
+  --blue:#3b82f6;--cyan:#06b6d4;--red:#ef4444;--amber:#f59e0b;--green:#22c55e;--purple:#a855f7;
+  --tx:#e2e8f0;--mt:#64748b;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--tx);font-family:'Noto Sans TC',sans-serif;padding-bottom:60px;}
+
+header{background:linear-gradient(135deg,#0d1b3e,#1a2855,#0d1b3e);border-bottom:1px solid var(--bd);padding:20px 18px 16px;text-align:center;}
+.hosp-name{font-size:15px;font-weight:700;letter-spacing:.03em;line-height:1.5;}
+.hosp-sub{font-size:13px;color:var(--cyan);font-weight:500;margin-bottom:10px;}
+.divider{width:40px;height:2px;background:var(--bd);margin:10px auto;}
+.form-title{font-size:18px;font-weight:700;}
+.sub{font-size:11px;color:var(--mt);margin-top:5px;line-height:1.5;}
+
+.pbar{background:var(--s1);border-bottom:1px solid var(--bd);padding:12px 18px;display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.fl{font-size:10px;color:var(--mt);font-family:'DM Mono',monospace;letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px;}
+input,select{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:7px 9px;font-size:13px;color:var(--tx);font-family:'Noto Sans TC',sans-serif;width:100%;outline:none;}
+input:focus,select:focus{border-color:var(--blue);}
+
+.intro{background:rgba(59,130,246,.06);border:1px solid var(--bd);border-bottom:none;margin:16px 18px 0;border-radius:10px 10px 0 0;padding:10px 14px;font-size:11px;color:var(--mt);line-height:1.7;}
+.intro b{color:var(--cyan);}
+
+/* IMS list */
+.list-wrap{background:var(--s2);border:1px solid var(--bd);border-top:none;margin:0 18px;border-radius:0 0 10px 10px;overflow:hidden;}
+
+.ims-item{display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;border-bottom:1px solid rgba(42,48,80,.5);transition:background .15s;}
+.ims-item:last-child{border-bottom:none;}
+.ims-item.selected{background:rgba(59,130,246,.08);}
+
+.radio{width:22px;height:22px;border-radius:50%;border:2px solid var(--bd);background:var(--s1);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;pointer-events:none;}
+.ims-item.selected .radio{border-color:var(--blue);background:var(--blue);}
+.rdot{width:8px;height:8px;border-radius:50%;background:#fff;display:none;pointer-events:none;}
+.ims-item.selected .rdot{display:block;}
+
+.lv-badge{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:16px;font-weight:700;flex-shrink:0;border:2px solid;pointer-events:none;}
+
+.itext{flex:1;pointer-events:none;}
+.iname{font-size:14px;font-weight:600;line-height:1.3;}
+.idesc{font-size:11px;color:var(--mt);margin-top:2px;line-height:1.4;}
+.itag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;margin-top:4px;font-weight:600;}
+
+/* Result */
+.result-section{background:var(--s1);border:1px solid var(--bd);border-radius:10px;margin:14px 18px 0;padding:14px;}
+.hint{text-align:center;padding:12px;font-size:12px;color:var(--mt);}
+.res-top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;}
+.res-lbl{font-size:11px;color:var(--mt);margin-bottom:3px;}
+.res-big{font-family:'DM Mono',monospace;font-size:44px;font-weight:700;line-height:1;}
+.res-max{font-size:14px;color:var(--mt);}
+.res-name{font-size:14px;font-weight:600;margin-top:3px;}
+.res-tag{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;font-family:'DM Mono',monospace;}
+
+/* Progress bar — segmented */
+.seg-bar{display:flex;gap:3px;margin-bottom:6px;}
+.seg{flex:1;height:10px;border-radius:3px;background:var(--bd);transition:all .3s;}
+.seg.on{opacity:1;}
+.seg.off{opacity:.2;}
+
+.milestone{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:11px;color:var(--green);display:none;}
+.milestone.show{display:block;}
+
+/* Alert */
+.alert{border-radius:10px;padding:12px 14px;border-left:4px solid;margin:12px 18px 0;}
+.atitle{font-size:13px;font-weight:700;margin-bottom:5px;}
+.alist{font-size:12px;color:var(--mt);line-height:1.8;padding-left:13px;}
+
+/* Safety checklist */
+.safety{background:var(--s1);border:1px solid var(--bd);border-radius:10px;margin:12px 18px 0;overflow:hidden;}
+.safety-head{background:var(--s2);border-bottom:1px solid var(--bd);padding:10px 14px;font-size:11px;color:var(--mt);font-family:'DM Mono',monospace;letter-spacing:.07em;text-transform:uppercase;}
+.safety-intro{padding:8px 14px 4px;font-size:11px;color:var(--mt);line-height:1.5;}
+.scheck{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(42,48,80,.4);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.scheck:last-child{border-bottom:none;}
+.sbox{width:20px;height:20px;border-radius:5px;border:2px solid var(--bd);background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;pointer-events:none;}
+.scheck.on .sbox{background:var(--green);border-color:var(--green);}
+.stk{display:none;pointer-events:none;}
+.scheck.on .stk{display:block;}
+.slbl{font-size:12px;pointer-events:none;line-height:1.4;}
+.safety-result{padding:8px 14px;font-size:11px;font-weight:600;text-align:center;}
+
+.nwrap{background:var(--s1);border:1px solid var(--bd);border-radius:10px;margin:12px 18px 0;overflow:hidden;}
+.nh{background:var(--s2);border-bottom:1px solid var(--bd);padding:8px 13px;font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--mt);}
+textarea{width:100%;background:var(--s1);border:none;padding:10px 13px;font-size:13px;color:var(--tx);font-family:'Noto Sans TC',sans-serif;resize:none;outline:none;min-height:70px;}
+
+.btns{display:flex;gap:10px;padding:12px 18px 0;}
+.btn{flex:1;padding:13px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+.bp{background:var(--blue);color:#fff;}
+.bs{background:var(--s2);border:1px solid var(--bd);color:var(--tx);}
+.ts{text-align:center;font-size:11px;color:var(--mt);font-family:'DM Mono',monospace;margin-top:13px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hosp-name">東元醫療社團法人東元綜合醫院</div>
+  <div class="hosp-sub">成人加護病房</div>
+  <div class="divider"></div>
+  <div class="form-title">早期活動評估表</div>
+  <p class="sub">ICU Mobility Scale (IMS)｜每日評估，記錄最高達成等級</p>
+</header>
+
+<div class="pbar">
+  <div><div class="fl">病人姓名 / 床號</div><input type="text" placeholder="王○○ / ICU-05" id="pname"></div>
+  <div><div class="fl">評估護理師</div><input type="text" placeholder="護理師姓名" id="nurse"></div>
+  <div><div class="fl">評估日期</div><input type="date" id="edate"></div>
+  <div><div class="fl">班別</div>
+    <select id="shift">
+      <option value="">請選擇</option>
+      <option>白班 08:00–16:00</option>
+      <option>小夜 16:00–24:00</option>
+      <option>大夜 00:00–08:00</option>
+    </select>
+  </div>
+</div>
+
+<div class="intro">
+  <b>IMS 評估說明</b>｜選擇病人目前能達到的最高活動等級（0–10）<br>
+  評估前請先確認安全條件（見下方安全確認清單）
+</div>
+
+<div class="list-wrap" id="ims-list">
+
+  <div class="ims-item" id="row-0" onclick="selectIMS(0)">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="lv-badge" style="color:#64748b;border-color:#64748b;background:rgba(100,116,139,.1)">0</div>
+    <div class="itext">
+      <div class="iname">完全臥床</div>
+      <div class="idesc">無任何主動活動，完全依賴照護人員</div>
+      <div class="itag" style="background:rgba(100,116,139,.15);color:#64748b">臥床期</div>
+    </div>
+  </div>
+
+  <div class="ims-item" id="row-1" onclick="selectIMS(1)">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="lv-badge" style="color:#8b5cf6;border-color:#8b5cf6;background:rgba(139,92,246,.1)">1</div>
+    <div class="itext">
+      <div class="iname">床上被動活動</div>
+      <div class="idesc">由治療師或護理師協助執行肢體活動（ROM exercise）</div>
+      <div class="itag" style="background:rgba(139,92,246,.15);color:#8b5cf6">被動復健</div>
+    </div>
+  </div>
+
+  <div class="ims-item" id="row-2" onclick="selectIMS(2)">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="lv-badge" style="color:#6366f1;border-color:#6366f1;background:rgba(99,102,241,.1)">2</div>
+    <div class="itext">
+      <div class="iname">床上主動活動</div>
+      <div class="idesc">病人可自行在床上翻身、移動肢體</div>
+      <div class="itag" style="background:rgba(99,102,241,.15);color:#6366f1">主動復健</div>
+    </div>
+  </div>
+
+  <div class="ims-item" id="row-3" onclick="selectIMS(3)">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="lv-badge" style="color:#3b82f6;border-color:#3b82f6;background:rgba(59,130,246,.1)">3</div>
+    <div class="itext">
+      <div class="iname">被動床邊坐起</div>
+      <div class="idesc">需完全協助將病人移至床邊坐姿，腳垂床沿</div>
+      <div class="itag" style="background:rgba(59,130,246,.15);color:#3b82f6">坐姿訓練</div>
+    </div>
+  </div>
+
+  <div class="ims-item" id="row-4" onclick="selectIMS(4)">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="lv-badge" style="color:#06b6d4;border-color:#06b6d4;background:rgba(6,182,212,.1)">4</div>
+    <div class="itext">
+      <div class="iname">主動床邊坐起 ⭐</div>
+      <div class="idesc">病人可自行或僅需少量協助坐至床邊，腳垂床沿</div>
+      <div class="itag" style="background:rgba(6,182,212,.15);color:#06b6d4">離床里程碑</div>
+    </div>
+  </div>
+
+  <div class="ims-item" id="row-5" onclick="selectIMS(5)">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="lv-badge" style="color:#22c55e;border-color:#22c55e;background:rgba(34,197,94,.1)">5</div>
+    <div class="itext">
+      <div class="iname">完全支撐下站立</div>
+      <div class="idesc">需人員完全支撐或使用站立輔助器（Standing frame）</div>
+      <div class="itag" style="background:rgba(34,197,94,.15);color:#22c55e">站立訓練</div>
+    </div>
+  </div>
+
+  <div class="ims-item" id="row-6" onclick="selectIMS(6)">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="lv-badge" style="color:#84cc16;border-color:#84cc16;background:rgba(132,204,22,.1)">6</div>
+    <div class="itext">
+      <div class="iname">部分支撐下站立</div>
+      <div class="idesc">需部分人員協助或扶持才能維持站姿</div>
+      <div class="itag" style="background:rgba(132,204,22,.15);color:#84cc16">站立進階</div>
+    </div>
+  </div>
+
+  <div class="ims-item" id="row-7" onclick="selectIMS(7)">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="lv-badge" style="color:#eab308;border-color:#eab308;background:rgba(234,179,8,.1)">7</div>
+    <div class="itext">
+      <div class="iname">原地踏步（需支撐）</div>
+      <div class="idesc">在支撐下可原地交替抬腳踏步</div>
+      <div class="itag" style="background:rgba(234,179,8,.15);color:#eab308">步行前期</div>
+    </div>
+  </div>
+
+  <div class="ims-item" id="row-8" onclick="selectIMS(8)">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="lv-badge" style="color:#f97316;border-color:#f97316;background:rgba(249,115,22,.1)">8</div>
+    <div class="itext">
+      <div class="iname">步行（需輔具或協助）</div>
+      <div class="idesc">使用助行器、拐杖或人員協助下可行走</div>
+      <div class="itag" style="background:rgba(249,115,22,.15);color:#f97316">輔助步行</div>
+    </div>
+  </div>
+
+  <div class="ims-item" id="row-9" onclick="selectIMS(9)">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="lv-badge" style="color:#ef4444;border-color:#ef4444;background:rgba(239,68,68,.1)">9</div>
+    <div class="itext">
+      <div class="iname">獨立步行</div>
+      <div class="idesc">不需輔具或人員協助，可獨立行走</div>
+      <div class="itag" style="background:rgba(239,68,68,.15);color:#ef4444">獨立步行</div>
+    </div>
+  </div>
+
+  <div class="ims-item" id="row-10" onclick="selectIMS(10)">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="lv-badge" style="color:#f43f5e;border-color:#f43f5e;background:rgba(244,63,94,.1)">10</div>
+    <div class="itext">
+      <div class="iname">獨立步行並可上下樓梯</div>
+      <div class="idesc">可獨立行走且能自行上下樓梯</div>
+      <div class="itag" style="background:rgba(244,63,94,.15);color:#f43f5e">完全獨立</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Result -->
+<div class="result-section">
+  <div class="hint" id="hint">↑ 請選擇病人目前能達到的最高活動等級</div>
+  <div id="result-body" style="display:none">
+    <div class="res-top">
+      <div>
+        <div class="res-lbl">IMS 等級</div>
+        <div><span class="res-big" id="r-score"></span><span class="res-max"> / 10</span></div>
+        <div class="res-name" id="r-name"></div>
+      </div>
+      <div style="text-align:right">
+        <div class="res-lbl">活動階段</div>
+        <div class="res-tag" id="r-tag"></div>
+      </div>
+    </div>
+    <div class="seg-bar" id="seg-bar">
+      <div class="seg off" id="seg0"  style="background:#64748b"></div>
+      <div class="seg off" id="seg1"  style="background:#8b5cf6"></div>
+      <div class="seg off" id="seg2"  style="background:#6366f1"></div>
+      <div class="seg off" id="seg3"  style="background:#3b82f6"></div>
+      <div class="seg off" id="seg4"  style="background:#06b6d4"></div>
+      <div class="seg off" id="seg5"  style="background:#22c55e"></div>
+      <div class="seg off" id="seg6"  style="background:#84cc16"></div>
+      <div class="seg off" id="seg7"  style="background:#eab308"></div>
+      <div class="seg off" id="seg8"  style="background:#f97316"></div>
+      <div class="seg off" id="seg9"  style="background:#ef4444"></div>
+      <div class="seg off" id="seg10" style="background:#f43f5e"></div>
+    </div>
+    <div class="milestone" id="milestone">🎉 達到離床里程碑！病人已可床邊坐起，可規劃進一步站立訓練。</div>
+  </div>
+</div>
+
+<!-- Alert -->
+<div class="alert" id="alert" style="display:none">
+  <div class="atitle" id="atitle"></div>
+  <ul class="alist" id="alist"></ul>
+</div>
+
+<!-- Safety checklist -->
+<div class="safety">
+  <div class="safety-head">活動安全確認清單（執行前必確認）</div>
+  <div class="safety-intro">以下條件均需確認，任一不符合則暫緩活動</div>
+  <div class="scheck" id="sc0" onclick="toggleSafety(0)">
+    <div class="sbox"><svg class="stk" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="slbl">SpO₂ ≥ 90%（或符合病人個別目標值）</div>
+  </div>
+  <div class="scheck" id="sc1" onclick="toggleSafety(1)">
+    <div class="sbox"><svg class="stk" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="slbl">HR 40–130 bpm，無新發生心律不整</div>
+  </div>
+  <div class="scheck" id="sc2" onclick="toggleSafety(2)">
+    <div class="sbox"><svg class="stk" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="slbl">MAP ≥ 65 mmHg，血壓穩定</div>
+  </div>
+  <div class="scheck" id="sc3" onclick="toggleSafety(3)">
+    <div class="sbox"><svg class="stk" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="slbl">RR 5–40 次/分，呼吸穩定</div>
+  </div>
+  <div class="scheck" id="sc4" onclick="toggleSafety(4)">
+    <div class="sbox"><svg class="stk" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="slbl">RASS -2 至 +1（意識狀態可配合）</div>
+  </div>
+  <div class="scheck" id="sc5" onclick="toggleSafety(5)">
+    <div class="sbox"><svg class="stk" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="slbl">管路已妥善固定（ET tube、CVC、胸管等）</div>
+  </div>
+  <div class="scheck" id="sc6" onclick="toggleSafety(6)">
+    <div class="sbox"><svg class="stk" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="slbl">疼痛已獲適當控制（NRS/CPOT 在可接受範圍）</div>
+  </div>
+  <div class="safety-result" id="safety-result" style="color:var(--mt)">0 / 7 項確認</div>
+</div>
+
+<div class="nwrap">
+  <div class="nh">護理紀錄 / 備註</div>
+  <textarea placeholder="記錄活動執行情況、病人耐受度、是否中止及原因、下一步目標…"></textarea>
+</div>
+
+<div class="btns">
+  <button class="btn bs" onclick="resetIMS()">🔄 清除重填</button>
+  <button class="btn bp" onclick="window.print()">🖨️ 列印 / 儲存</button>
+</div>
+<div class="ts" id="ts"></div>
+
+<script>
+var IMS_DATA = [
+  {name:'完全臥床',       tag:'臥床期',    color:'#64748b', tagBg:'rgba(100,116,139,.15)',
+   title:'⬜ IMS 0 — 完全臥床',
+   actions:['執行被動關節活動（ROM exercise）每日2次','定時翻身，預防壓瘡','評估是否符合開始復健的條件','與復健師討論復健計畫','記錄臥床原因（疾病嚴重度、管路、血流動力學）']},
+  {name:'床上被動活動',   tag:'被動復健',  color:'#8b5cf6', tagBg:'rgba(139,92,246,.15)',
+   title:'🟣 IMS 1 — 床上被動活動',
+   actions:['由物理治療師執行全關節被動活動','每次 15–30 分鐘，每日 1–2 次','監測生命徵象，若有不適立即停止','評估是否可進階至主動輔助運動','記錄關節活動度與病人耐受度']},
+  {name:'床上主動活動',   tag:'主動復健',  color:'#6366f1', tagBg:'rgba(99,102,241,.15)',
+   title:'🟣 IMS 2 — 床上主動活動',
+   actions:['鼓勵病人自行翻身與移動肢體','教導床上上肢及下肢主動運動','目標每日 2 次，每次 20–30 分鐘','評估進階至床邊坐起的可行性','監測活動前後生命徵象']},
+  {name:'被動床邊坐起',   tag:'坐姿訓練',  color:'#3b82f6', tagBg:'rgba(59,130,246,.15)',
+   title:'🔵 IMS 3 — 被動床邊坐起',
+   actions:['需 2–3 名人員協助移至床邊坐姿','確認管路長度足夠，預防意外脫管','坐姿維持目標：5–15 分鐘','監測血壓（姿位性低血壓風險）','記錄坐姿維持時間與耐受狀況']},
+  {name:'主動床邊坐起',   tag:'離床里程碑',color:'#06b6d4', tagBg:'rgba(6,182,212,.15)',
+   title:'🏆 IMS 4 — 主動床邊坐起（離床里程碑）',
+   actions:['恭喜！病人已達離床里程碑 🎉','評估是否可進一步嘗試站立','坐姿訓練目標逐步增加至 30 分鐘','進行坐姿平衡訓練','通知醫師及復健師，討論進階計畫','記錄坐姿維持時間與穩定度']},
+  {name:'完全支撐下站立', tag:'站立訓練',  color:'#22c55e', tagBg:'rgba(34,197,94,.15)',
+   title:'🟢 IMS 5 — 完全支撐下站立',
+   actions:['使用站立輔助器或 2 人以上支撐','站立目標：從 1–2 分鐘逐步增加','密切監測血壓，防止姿位性低血壓','評估下肢肌力（MRC Score）','記錄站立時間與血壓變化']},
+  {name:'部分支撐下站立', tag:'站立進階',  color:'#84cc16', tagBg:'rgba(132,204,22,.15)',
+   title:'🟢 IMS 6 — 部分支撐下站立',
+   actions:['持續站立訓練，增加站立時間','評估平衡能力（單腳站、重心轉移）','開始嘗試原地踏步','評估步行輔具需求','記錄站立時間與協助程度']},
+  {name:'原地踏步（需支撐）',tag:'步行前期',color:'#eab308', tagBg:'rgba(234,179,8,.15)',
+   title:'🟡 IMS 7 — 原地踏步',
+   actions:['在支撐下執行原地踏步訓練','評估步態與平衡','逐步嘗試短距離步行','確認輔具適合性（助行器、拐杖）','記錄踏步次數與協助程度']},
+  {name:'步行（需輔具或協助）',tag:'輔助步行',color:'#f97316', tagBg:'rgba(249,115,22,.15)',
+   title:'🟠 IMS 8 — 輔助步行',
+   actions:['訂定每日步行距離目標（從 5 公尺開始）','逐步增加步行距離與頻率','評估是否可減少輔具依賴','記錄步行距離、速度與協助程度','評估出院後居家安全性']},
+  {name:'獨立步行',       tag:'獨立步行',  color:'#ef4444', tagBg:'rgba(239,68,68,.15)',
+   title:'🔴 IMS 9 — 獨立步行',
+   actions:['持續增加步行距離與速度','評估上下樓梯能力','討論轉出 ICU 計畫','評估出院後復健需求','記錄步行距離與自主程度']},
+  {name:'獨立步行並可上下樓梯',tag:'完全獨立',color:'#f43f5e', tagBg:'rgba(244,63,94,.15)',
+   title:'🔴 IMS 10 — 完全獨立',
+   actions:['恭喜！病人已達最高活動等級 🎉','評估轉出 ICU 及出院條件','安排出院後門診復健計畫','衛教病人及家屬居家運動計畫','記錄完整功能恢復歷程']}
+];
+
+var safetyChecked = [false,false,false,false,false,false,false];
+
+function selectIMS(lv) {
+  for(var i=0;i<=10;i++) document.getElementById('row-'+i).classList.remove('selected');
+  document.getElementById('row-'+lv).classList.add('selected');
+
+  var d = IMS_DATA[lv];
+  document.getElementById('hint').style.display='none';
+  document.getElementById('result-body').style.display='block';
+  document.getElementById('alert').style.display='block';
+
+  var rs=document.getElementById('r-score'); rs.textContent=lv; rs.style.color=d.color;
+  var rn=document.getElementById('r-name');  rn.textContent=d.name; rn.style.color=d.color;
+  var rt=document.getElementById('r-tag');
+  rt.textContent=d.tag; rt.style.background=d.tagBg; rt.style.color=d.color;
+
+  // Segments
+  for(var j=0;j<=10;j++){
+    var seg=document.getElementById('seg'+j);
+    seg.className='seg '+(j<=lv?'on':'off');
+  }
+
+  // Milestone
+  document.getElementById('milestone').className='milestone'+(lv>=4?' show':'');
+
+  // Alert
+  var al=document.getElementById('alert');
+  al.style.borderColor=d.color; al.style.background=d.tagBg;
+  var at=document.getElementById('atitle'); at.textContent=d.title; at.style.color=d.color;
+  var html=''; for(var k=0;k<d.actions.length;k++) html+='<li>'+d.actions[k]+'</li>';
+  document.getElementById('alist').innerHTML=html;
+
+  document.getElementById('ts').textContent='評估時間：'+new Date().toLocaleString('zh-TW');
+}
+
+function toggleSafety(i) {
+  safetyChecked[i]=!safetyChecked[i];
+  document.getElementById('sc'+i).classList.toggle('on',safetyChecked[i]);
+  var count=safetyChecked.filter(Boolean).length;
+  var sr=document.getElementById('safety-result');
+  sr.textContent=count+' / 7 項確認';
+  sr.style.color=count===7?'var(--green)':count>=4?'var(--amber)':'var(--mt)';
+}
+
+function resetIMS() {
+  if(!confirm('確定要清除所有資料？')) return;
+  for(var i=0;i<=10;i++) document.getElementById('row-'+i).classList.remove('selected');
+  document.getElementById('hint').style.display='block';
+  document.getElementById('result-body').style.display='none';
+  document.getElementById('alert').style.display='none';
+  for(var j=0;j<=10;j++){var seg=document.getElementById('seg'+j);seg.className='seg off';}
+  document.getElementById('milestone').className='milestone';
+  safetyChecked=[false,false,false,false,false,false,false];
+  for(var k=0;k<7;k++) document.getElementById('sc'+k).classList.remove('on');
+  document.getElementById('safety-result').textContent='0 / 7 項確認';
+  document.getElementById('safety-result').style.color='var(--mt)';
+  document.getElementById('edate').value=new Date().toISOString().split('T')[0];
+  document.getElementById('pname').value='';
+  document.getElementById('nurse').value='';
+  document.getElementById('shift').selectedIndex=0;
+  document.getElementById('ts').textContent='';
+}
+
+document.getElementById('edate').value=new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
