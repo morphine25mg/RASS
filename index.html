@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RASS 鎮靜評估表</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#0f1117;--s1:#181c27;--s2:#1e2336;--bd:#2a3050;
+  --blue:#3b82f6;--cyan:#06b6d4;--red:#ef4444;--amber:#f59e0b;--green:#22c55e;
+  --tx:#e2e8f0;--mt:#64748b;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--tx);font-family:'Noto Sans TC',sans-serif;padding-bottom:60px;}
+
+header{background:linear-gradient(135deg,#0d1b3e,#1a2855,#0d1b3e);border-bottom:1px solid var(--bd);padding:20px 18px 16px;text-align:center;}
+.hosp-name{font-size:15px;font-weight:700;color:var(--tx);letter-spacing:.03em;line-height:1.5;}
+.hosp-sub{font-size:13px;color:var(--cyan);font-weight:500;margin-bottom:10px;}
+.divider{width:40px;height:2px;background:var(--bd);margin:10px auto;}
+.form-title{font-size:18px;font-weight:700;color:var(--tx);}
+.sub{font-size:11px;color:var(--mt);margin-top:5px;line-height:1.5;}
+
+.pbar{background:var(--s1);border-bottom:1px solid var(--bd);padding:12px 18px;display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.fl{font-size:10px;color:var(--mt);font-family:'DM Mono',monospace;letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px;}
+input,select{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:7px 9px;font-size:13px;color:var(--tx);font-family:'Noto Sans TC',sans-serif;width:100%;outline:none;}
+input:focus,select:focus{border-color:var(--blue);}
+
+.intro{background:rgba(59,130,246,.06);border:1px solid var(--bd);border-bottom:none;margin:16px 18px 0;border-radius:10px 10px 0 0;padding:10px 14px;font-size:11px;color:var(--mt);line-height:1.7;}
+.intro b{color:var(--cyan);}
+
+.list-wrap{background:var(--s2);border:1px solid var(--bd);border-top:none;margin:0 18px;border-radius:0 0 10px 10px;overflow:hidden;}
+
+.rass-item{display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;border-bottom:1px solid rgba(42,48,80,.5);}
+.rass-item:last-child{border-bottom:none;}
+.rass-item.selected{background:rgba(59,130,246,.08);}
+
+.radio{width:22px;height:22px;border-radius:50%;border:2px solid var(--bd);background:var(--s1);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;pointer-events:none;}
+.rass-item.selected .radio{border-color:var(--blue);background:var(--blue);}
+.rdot{width:8px;height:8px;border-radius:50%;background:#fff;display:none;pointer-events:none;}
+.rass-item.selected .rdot{display:block;}
+
+.sc{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:13px;font-weight:700;flex-shrink:0;border:2px solid;pointer-events:none;}
+.itext{flex:1;pointer-events:none;}
+.iname{font-size:14px;font-weight:600;}
+.idesc{font-size:11px;color:var(--mt);margin-top:2px;line-height:1.4;}
+
+.result-section{background:var(--s1);border:1px solid var(--bd);border-radius:10px;margin:14px 18px 0;padding:16px;}
+.hint{text-align:center;padding:12px;font-size:12px;color:var(--mt);}
+.result-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.rlbl{font-size:11px;color:var(--mt);margin-bottom:4px;}
+.rscore{font-family:'DM Mono',monospace;font-size:44px;font-weight:700;line-height:1;}
+.rname{font-size:14px;font-weight:600;margin-top:2px;}
+.rtag{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;font-family:'DM Mono',monospace;}
+.scale-lrow{display:flex;justify-content:space-between;font-size:10px;color:var(--mt);font-family:'DM Mono',monospace;margin-bottom:4px;}
+.scale-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin-bottom:4px;}
+.seg{flex:1;transition:opacity .3s;}
+
+.alert{border-radius:10px;padding:12px 14px;border-left:4px solid;margin:12px 18px 0;}
+.atitle{font-size:13px;font-weight:700;margin-bottom:5px;}
+.alist{font-size:12px;color:var(--mt);line-height:1.8;padding-left:13px;}
+
+.nwrap{background:var(--s1);border:1px solid var(--bd);border-radius:10px;margin:12px 18px 0;overflow:hidden;}
+.nh{background:var(--s2);border-bottom:1px solid var(--bd);padding:8px 13px;font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--mt);}
+textarea{width:100%;background:var(--s1);border:none;padding:10px 13px;font-size:13px;color:var(--tx);font-family:'Noto Sans TC',sans-serif;resize:none;outline:none;min-height:70px;}
+
+.btns{display:flex;gap:10px;padding:12px 18px 0;}
+.btn{flex:1;padding:13px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+.bp{background:var(--blue);color:#fff;}
+.bs{background:var(--s2);border:1px solid var(--bd);color:var(--tx);}
+.ts{text-align:center;font-size:11px;color:var(--mt);font-family:'DM Mono',monospace;margin-top:13px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hosp-name">東元醫療社團法人東元綜合醫院</div>
+  <div class="hosp-sub">成人加護病房</div>
+  <div class="divider"></div>
+  <div class="form-title">鎮靜程度評估表</div>
+  <p class="sub">Richmond Agitation-Sedation Scale (RASS)｜每班評估</p>
+</header>
+
+<div class="pbar">
+  <div><div class="fl">病人姓名 / 床號</div><input type="text" placeholder="王○○ / ICU-05" id="pname"></div>
+  <div><div class="fl">評估護理師</div><input type="text" placeholder="護理師姓名" id="nurse"></div>
+  <div><div class="fl">評估日期</div><input type="date" id="edate"></div>
+  <div><div class="fl">班別</div>
+    <select id="shift">
+      <option value="">請選擇</option>
+      <option>白班 08:00–16:00</option>
+      <option>小夜 16:00–24:00</option>
+      <option>大夜 00:00–08:00</option>
+    </select>
+  </div>
+</div>
+
+<div class="intro">
+  <b>RASS 評估方式</b>｜觀察病人 → 呼喚病人 → 必要時給予疼痛刺激<br>
+  選擇最符合病人當下狀態的一個等級（單選）
+</div>
+
+<div class="list-wrap">
+  <div class="rass-item" id="row-p4" onclick="selectRass('p4')">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="sc" style="color:#ef4444;border-color:#ef4444;background:rgba(239,68,68,.1)">+4</div>
+    <div class="itext"><div class="iname">好鬥的（Combative）</div><div class="idesc">明顯好鬥、暴力，對工作人員造成立即危險</div></div>
+  </div>
+  <div class="rass-item" id="row-p3" onclick="selectRass('p3')">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="sc" style="color:#f97316;border-color:#f97316;background:rgba(249,115,22,.1)">+3</div>
+    <div class="itext"><div class="iname">非常躁動（Very Agitated）</div><div class="idesc">拉扯或移除管路、攻擊工作人員</div></div>
+  </div>
+  <div class="rass-item" id="row-p2" onclick="selectRass('p2')">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="sc" style="color:#f59e0b;border-color:#f59e0b;background:rgba(245,158,11,.1)">+2</div>
+    <div class="itext"><div class="iname">躁動（Agitated）</div><div class="idesc">頻繁的無目的動作、對呼吸器對抗</div></div>
+  </div>
+  <div class="rass-item" id="row-p1" onclick="selectRass('p1')">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="sc" style="color:#eab308;border-color:#eab308;background:rgba(234,179,8,.1)">+1</div>
+    <div class="itext"><div class="iname">不安（Restless）</div><div class="idesc">焦慮或恐懼，但動作不具攻擊性、不激烈</div></div>
+  </div>
+  <div class="rass-item" id="row-0" onclick="selectRass('0')">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="sc" style="color:#22c55e;border-color:#22c55e;background:rgba(34,197,94,.1)">0</div>
+    <div class="itext"><div class="iname">清醒且平靜（Alert and Calm）</div><div class="idesc">自然清醒，無躁動、無過度鎮靜</div></div>
+  </div>
+  <div class="rass-item" id="row-n1" onclick="selectRass('n1')">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="sc" style="color:#06b6d4;border-color:#06b6d4;background:rgba(6,182,212,.1)">-1</div>
+    <div class="itext"><div class="iname">嗜睡（Drowsy）</div><div class="idesc">不完全清醒，呼喚後有持續眼神接觸（&gt;10秒）</div></div>
+  </div>
+  <div class="rass-item" id="row-n2" onclick="selectRass('n2')">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="sc" style="color:#3b82f6;border-color:#3b82f6;background:rgba(59,130,246,.1)">-2</div>
+    <div class="itext"><div class="iname">輕度鎮靜（Light Sedation）</div><div class="idesc">呼喚後有短暫眼神接觸（&lt;10秒）</div></div>
+  </div>
+  <div class="rass-item" id="row-n3" onclick="selectRass('n3')">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="sc" style="color:#6366f1;border-color:#6366f1;background:rgba(99,102,241,.1)">-3</div>
+    <div class="itext"><div class="iname">中度鎮靜（Moderate Sedation）</div><div class="idesc">呼喚後有動作或睜眼，但無眼神接觸</div></div>
+  </div>
+  <div class="rass-item" id="row-n4" onclick="selectRass('n4')">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="sc" style="color:#8b5cf6;border-color:#8b5cf6;background:rgba(139,92,246,.1)">-4</div>
+    <div class="itext"><div class="iname">深度鎮靜（Deep Sedation）</div><div class="idesc">呼喚無反應，疼痛刺激後有動作或睜眼</div></div>
+  </div>
+  <div class="rass-item" id="row-n5" onclick="selectRass('n5')">
+    <div class="radio"><div class="rdot"></div></div>
+    <div class="sc" style="color:#a855f7;border-color:#a855f7;background:rgba(168,85,247,.1)">-5</div>
+    <div class="itext"><div class="iname">無法喚醒（Unarousable）</div><div class="idesc">呼喚及疼痛刺激均無任何反應</div></div>
+  </div>
+</div>
+
+<!-- Result -->
+<div class="result-section">
+  <div class="hint" id="hint">↑ 請選擇病人當下的狀態</div>
+  <div id="result-body" style="display:none">
+    <div class="result-top">
+      <div>
+        <div class="rlbl">RASS 分數</div>
+        <div class="rscore" id="r-score"></div>
+        <div class="rname" id="r-name"></div>
+      </div>
+      <div style="text-align:right">
+        <div class="rlbl">目標鎮靜範圍</div>
+        <div class="rtag" id="r-tag"></div>
+      </div>
+    </div>
+    <div class="scale-lrow"><span>+4 躁動</span><span>0 正常</span><span>-5 無反應</span></div>
+    <div class="scale-bar">
+      <div class="seg" id="seg-p4" style="background:#ef4444"></div>
+      <div class="seg" id="seg-p3" style="background:#f97316"></div>
+      <div class="seg" id="seg-p2" style="background:#f59e0b"></div>
+      <div class="seg" id="seg-p1" style="background:#eab308"></div>
+      <div class="seg" id="seg-0"  style="background:#22c55e"></div>
+      <div class="seg" id="seg-n1" style="background:#06b6d4"></div>
+      <div class="seg" id="seg-n2" style="background:#3b82f6"></div>
+      <div class="seg" id="seg-n3" style="background:#6366f1"></div>
+      <div class="seg" id="seg-n4" style="background:#8b5cf6"></div>
+      <div class="seg" id="seg-n5" style="background:#a855f7"></div>
+    </div>
+  </div>
+</div>
+
+<div class="alert" id="alert" style="display:none">
+  <div class="atitle" id="atitle"></div>
+  <ul class="alist" id="alist"></ul>
+</div>
+
+<div class="nwrap">
+  <div class="nh">護理紀錄 / 備註</div>
+  <textarea placeholder="記錄評估情境、特殊行為、已調整的藥物劑量…"></textarea>
+</div>
+
+<div class="btns">
+  <button class="btn bs" onclick="resetRass()">🔄 清除重填</button>
+  <button class="btn bp" onclick="window.print()">🖨️ 列印 / 儲存</button>
+</div>
+<div class="ts" id="ts"></div>
+
+<script>
+var RASS_DATA = {
+  'p4':{score:'+4',name:'好鬥的',color:'#ef4444',tagBg:'rgba(239,68,68,.15)',tag:'⚠️ 超出目標範圍',
+    title:'🔴 RASS +4 好鬥 — 立即處置',
+    actions:['立即通報主責醫師','評估是否需要緊急給予鎮靜藥物（依醫囑）','採雙人照護，確保工作人員安全','病房門口張貼高風險警示','同時執行 BVC 暴力風險篩選','排查原因：疼痛、低血氧、尿滯留、譫妄、藥物戒斷']},
+  'p3':{score:'+3',name:'非常躁動',color:'#f97316',tagBg:'rgba(249,115,22,.15)',tag:'⚠️ 超出目標範圍',
+    title:'🔴 RASS +3 非常躁動 — 立即處置',
+    actions:['通報主責醫師，評估增加鎮靜藥物劑量','確認管路固定，預防非計畫性拔管','評估疼痛（CPOT/NRS），給予適當止痛','避免單人進入病房','同時執行 BVC 暴力風險篩選','排查原因：疼痛、低血氧、尿滯留、譫妄']},
+  'p2':{score:'+2',name:'躁動',color:'#f59e0b',tagBg:'rgba(245,158,11,.15)',tag:'⚠️ 超出目標範圍',
+    title:'🟠 RASS +2 躁動 — 積極處置',
+    actions:['通報主責醫師，討論鎮靜藥物調整','評估並處理疼痛','確認管路固定，加強約束評估','給予語言安撫，降低環境刺激（燈光、噪音）','評估是否有人工氣道不適、尿滯留等誘因','考慮執行 BVC 暴力風險篩選']},
+  'p1':{score:'+1',name:'不安',color:'#eab308',tagBg:'rgba(234,179,8,.15)',tag:'略高於目標',
+    title:'🟡 RASS +1 不安 — 加強評估',
+    actions:['評估焦慮或不適的原因','給予語言安撫與解釋','評估疼痛程度','確認管路是否造成不適','若持續，通知醫師評估藥物調整','加強觀察頻率']},
+  '0':{score:'0',name:'清醒且平靜',color:'#22c55e',tagBg:'rgba(34,197,94,.15)',tag:'✓ 達到目標',
+    title:'🟢 RASS 0 清醒且平靜 — 維持現況',
+    actions:['維持目前鎮靜藥物劑量','繼續每班評估','進行每日鎮靜中斷（SAT）評估','鼓勵早期活動與復健','評估是否可嘗試脫離機械通氣']},
+  'n1':{score:'-1',name:'嗜睡',color:'#06b6d4',tagBg:'rgba(6,182,212,.15)',tag:'✓ 可接受範圍',
+    title:'🔵 RASS -1 嗜睡 — 持續監測',
+    actions:['多數情況屬於可接受的鎮靜深度','持續每班評估','確認呼吸道通暢','評估是否可進行每日鎮靜中斷（SAT）','監測血氧、血壓等生命徵象']},
+  'n2':{score:'-2',name:'輕度鎮靜',color:'#3b82f6',tagBg:'rgba(59,130,246,.15)',tag:'✓ 常見目標範圍',
+    title:'🔵 RASS -2 輕度鎮靜 — 維持監測',
+    actions:['多數 ICU 病人的目標鎮靜深度','持續每班評估','每日進行鎮靜中斷評估（SAT）','監測生命徵象與呼吸狀態','若有改善目標可逐步降低鎮靜藥物']},
+  'n3':{score:'-3',name:'中度鎮靜',color:'#6366f1',tagBg:'rgba(99,102,241,.15)',tag:'視情況而定',
+    title:'🟣 RASS -3 中度鎮靜 — 評估必要性',
+    actions:['確認是否有中度鎮靜的適應症（如 ARDS、顱內壓升高）','若無特殊需求，通知醫師評估減少鎮靜藥物','加強呼吸道管理，預防分泌物堆積','監測生命徵象','記錄鎮靜目標與當前狀態的差異']},
+  'n4':{score:'-4',name:'深度鎮靜',color:'#8b5cf6',tagBg:'rgba(139,92,246,.15)',tag:'需評估適應症',
+    title:'🟣 RASS -4 深度鎮靜 — 積極評估',
+    actions:['確認深度鎮靜的醫療適應症','通知醫師，評估是否可降低鎮靜深度','加強翻身、口腔護理、肺部物理治療','監測生命徵象及神經學狀態','評估是否使用每日鎮靜中斷協議（SAT）','預防長期臥床併發症']},
+  'n5':{score:'-5',name:'無法喚醒',color:'#a855f7',tagBg:'rgba(168,85,247,.15)',tag:'需立即評估',
+    title:'🟣 RASS -5 無法喚醒 — 立即評估',
+    actions:['立即通報主責醫師','評估是否為藥物過量或非預期的深度鎮靜','檢查鎮靜藥物劑量，必要時暫停或拮抗','確認呼吸道通暢，監測血氧飽和度','評估神經學狀態，考慮 CT 或其他檢查','密切監測生命徵象']}
+};
+
+var KEYS = ['p4','p3','p2','p1','0','n1','n2','n3','n4','n5'];
+var current = null;
+
+function selectRass(key) {
+  // Clear all
+  for (var i = 0; i < KEYS.length; i++) {
+    document.getElementById('row-' + KEYS[i]).classList.remove('selected');
+    document.getElementById('seg-' + KEYS[i]).style.opacity = '0.2';
+  }
+  // Select clicked
+  document.getElementById('row-' + key).classList.add('selected');
+  document.getElementById('seg-' + key).style.opacity = '1';
+  current = key;
+
+  var d = RASS_DATA[key];
+
+  // Show result
+  document.getElementById('hint').style.display = 'none';
+  document.getElementById('result-body').style.display = 'block';
+
+  var rs = document.getElementById('r-score');
+  rs.textContent = d.score;
+  rs.style.color = d.color;
+
+  var rn = document.getElementById('r-name');
+  rn.textContent = d.name;
+  rn.style.color = d.color;
+
+  var rt = document.getElementById('r-tag');
+  rt.textContent = d.tag;
+  rt.style.background = d.tagBg;
+  rt.style.color = d.color;
+
+  // Alert
+  var alert = document.getElementById('alert');
+  alert.style.display = 'block';
+  alert.style.borderColor = d.color;
+  alert.style.background = d.tagBg;
+
+  var at = document.getElementById('atitle');
+  at.textContent = d.title;
+  at.style.color = d.color;
+
+  var html = '';
+  for (var j = 0; j < d.actions.length; j++) {
+    html += '<li>' + d.actions[j] + '</li>';
+  }
+  document.getElementById('alist').innerHTML = html;
+
+  document.getElementById('ts').textContent = '評估時間：' + new Date().toLocaleString('zh-TW');
+}
+
+function resetRass() {
+  if (!confirm('確定要清除所有資料？')) return;
+  current = null;
+  for (var i = 0; i < KEYS.length; i++) {
+    document.getElementById('row-' + KEYS[i]).classList.remove('selected');
+    document.getElementById('seg-' + KEYS[i]).style.opacity = '1';
+  }
+  document.getElementById('hint').style.display = 'block';
+  document.getElementById('result-body').style.display = 'none';
+  document.getElementById('alert').style.display = 'none';
+  document.getElementById('edate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('pname').value = '';
+  document.getElementById('nurse').value = '';
+  document.getElementById('shift').selectedIndex = 0;
+  document.getElementById('ts').textContent = '';
+}
+
+document.getElementById('edate').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
