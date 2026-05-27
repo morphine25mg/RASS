@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BVC 暴力風險篩選表</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#0f1117;--s1:#181c27;--s2:#1e2336;--bd:#2a3050;
+  --blue:#3b82f6;--cyan:#06b6d4;--red:#ef4444;--amber:#f59e0b;--green:#22c55e;
+  --tx:#e2e8f0;--mt:#64748b;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--tx);font-family:'Noto Sans TC',sans-serif;padding-bottom:60px;}
+
+header{background:linear-gradient(135deg,#0d1b3e,#1a2855,#0d1b3e);border-bottom:1px solid var(--bd);padding:20px 18px 16px;text-align:center;}
+.hosp-name{font-size:15px;font-weight:700;color:var(--tx);letter-spacing:.03em;line-height:1.5;}
+.hosp-sub{font-size:13px;color:var(--cyan);font-weight:500;margin-bottom:10px;}
+.divider{width:40px;height:2px;background:var(--bd);margin:10px auto;}
+.form-title{font-size:18px;font-weight:700;color:var(--tx);}
+.sub{font-size:11px;color:var(--mt);margin-top:5px;line-height:1.5;}
+
+.pbar{background:var(--s1);border-bottom:1px solid var(--bd);padding:12px 18px;display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.fl{font-size:10px;color:var(--mt);font-family:'DM Mono',monospace;letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px;}
+input,select{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:7px 9px;font-size:13px;color:var(--tx);font-family:'Noto Sans TC',sans-serif;width:100%;outline:none;}
+input:focus,select:focus{border-color:var(--blue);}
+
+.intro{background:rgba(59,130,246,.06);border:1px solid var(--bd);border-bottom:none;margin:16px 18px 0;border-radius:10px 10px 0 0;padding:10px 14px;font-size:11px;color:var(--mt);line-height:1.7;}
+.intro b{color:var(--cyan);}
+
+.list-wrap{background:var(--s2);border:1px solid var(--bd);border-top:none;margin:0 18px;border-radius:0 0 10px 10px;overflow:hidden;}
+
+/* Clickable item row */
+.item{display:flex;align-items:center;gap:12px;padding:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;transition:background .15s;}
+.item:not(:last-child){border-bottom:1px solid rgba(42,48,80,.5);}
+.item:active{background:rgba(255,255,255,.03);}
+
+/* Checkbox */
+.cb{width:24px;height:24px;border-radius:6px;border:2px solid var(--bd);background:var(--s1);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
+.item.on .cb{background:var(--blue);border-color:var(--blue);}
+.checkmark{display:none;}
+.item.on .checkmark{display:block;}
+
+.num{font-family:'DM Mono',monospace;font-size:11px;color:var(--mt);flex-shrink:0;width:16px;text-align:center;}
+.itext{flex:1;}
+.iname{font-size:14px;font-weight:500;}
+.idesc{font-size:11px;color:var(--mt);margin-top:2px;line-height:1.4;}
+.ival{font-family:'DM Mono',monospace;font-size:13px;color:var(--mt);flex-shrink:0;}
+.item.on .ival{color:var(--blue);}
+
+/* Score */
+.score-section{background:var(--s1);border:1px solid var(--bd);border-radius:10px;margin:14px 18px 0;padding:14px;}
+.score-top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px;}
+.score-lbl{font-size:11px;color:var(--mt);margin-bottom:2px;}
+.score-big{font-family:'DM Mono',monospace;font-size:40px;font-weight:500;line-height:1;}
+.score-max{font-size:14px;color:var(--mt);}
+.risk-lbl{font-size:13px;font-weight:700;}
+.meter{height:8px;background:var(--bd);border-radius:4px;overflow:hidden;margin-bottom:8px;}
+.fill{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1),background .4s;}
+.dot-row{display:flex;gap:4px;}
+.dot{height:26px;border-radius:5px;background:var(--s2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:10px;color:var(--mt);transition:all .3s;flex:1;}
+.dot.on{background:var(--blue);border-color:var(--blue);color:#fff;}
+
+/* Alert */
+.alert{border-radius:10px;padding:12px 14px;border-left:4px solid;margin:12px 18px 0;}
+.alert.al{background:rgba(34,197,94,.08);border-color:var(--green);}
+.alert.am{background:rgba(245,158,11,.08);border-color:var(--amber);}
+.alert.ah{background:rgba(239,68,68,.08);border-color:var(--red);}
+.alert-title{font-size:13px;font-weight:700;margin-bottom:5px;}
+.alert-list{font-size:12px;color:var(--mt);line-height:1.8;padding-left:13px;}
+
+.nwrap{background:var(--s1);border:1px solid var(--bd);border-radius:10px;margin:12px 18px 0;overflow:hidden;}
+.nh{background:var(--s2);border-bottom:1px solid var(--bd);padding:8px 13px;font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--mt);}
+textarea{width:100%;background:var(--s1);border:none;padding:10px 13px;font-size:13px;color:var(--tx);font-family:'Noto Sans TC',sans-serif;resize:none;outline:none;min-height:70px;}
+
+.btns{display:flex;gap:10px;padding:12px 18px 0;}
+.btn{flex:1;padding:13px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+.bp{background:var(--blue);color:#fff;}
+.bs{background:var(--s2);border:1px solid var(--bd);color:var(--tx);}
+.ts{text-align:center;font-size:11px;color:var(--mt);font-family:'DM Mono',monospace;margin-top:13px;}
+
+.cg{color:var(--green);}.ca{color:var(--amber);}.cr{color:var(--red);}
+.bg{background:var(--green);}.ba{background:var(--amber);}.br{background:var(--red);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hosp-name">東元醫療社團法人東元綜合醫院</div>
+  <div class="hosp-sub">成人加護病房</div>
+  <div class="divider"></div>
+  <div class="form-title">病人暴力風險篩選表</div>
+  <p class="sub">Brøset Violence Checklist (BVC)｜每班評估，高風險每4小時重評</p>
+</header>
+
+<div class="pbar">
+  <div><div class="fl">病人姓名 / 床號</div><input type="text" placeholder="王○○ / ICU-05" id="pname"></div>
+  <div><div class="fl">評估護理師</div><input type="text" placeholder="護理師姓名" id="nurse"></div>
+  <div><div class="fl">評估日期</div><input type="date" id="edate"></div>
+  <div><div class="fl">班別</div>
+    <select id="shift">
+      <option value="">請選擇</option>
+      <option>白班 08:00–16:00</option>
+      <option>小夜 16:00–24:00</option>
+      <option>大夜 00:00–08:00</option>
+    </select>
+  </div>
+</div>
+
+<div class="intro">
+  每項：0 = 無，1 = 有（過去24小時內觀察到）<br>
+  總分 0：低風險　｜　1：輕度，提高警覺　｜　≥2：高風險，須立即採取預防措施
+</div>
+
+<div class="list-wrap" id="bvc-list">
+  <div class="item" data-i="0">
+    <div class="cb"><svg class="checkmark" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="num">1</div>
+    <div class="itext"><div class="iname">意識混亂</div><div class="idesc">對時間、地點、人物定向障礙；行為不尋常或無法預測</div></div>
+    <div class="ival" id="v0">0</div>
+  </div>
+  <div class="item" data-i="1">
+    <div class="cb"><svg class="checkmark" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="num">2</div>
+    <div class="itext"><div class="iname">易激怒</div><div class="idesc">對小事過度反應、情緒不穩定、容易被激怒</div></div>
+    <div class="ival" id="v1">0</div>
+  </div>
+  <div class="item" data-i="2">
+    <div class="cb"><svg class="checkmark" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="num">3</div>
+    <div class="itext"><div class="iname">喧鬧</div><div class="idesc">大聲說話、製造噪音、不適當的喧鬧行為</div></div>
+    <div class="ival" id="v2">0</div>
+  </div>
+  <div class="item" data-i="3">
+    <div class="cb"><svg class="checkmark" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="num">4</div>
+    <div class="itext"><div class="iname">言語威脅</div><div class="idesc">以言語威脅傷害自己或他人</div></div>
+    <div class="ival" id="v3">0</div>
+  </div>
+  <div class="item" data-i="4">
+    <div class="cb"><svg class="checkmark" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="num">5</div>
+    <div class="itext"><div class="iname">肢體威脅</div><div class="idesc">威脅性的肢體動作，如舉拳、揮手、作勢攻擊</div></div>
+    <div class="ival" id="v4">0</div>
+  </div>
+  <div class="item" data-i="5">
+    <div class="cb"><svg class="checkmark" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="num">6</div>
+    <div class="itext"><div class="iname">攻擊物品</div><div class="idesc">打破物品、撕扯、丟擲物品或破壞環境</div></div>
+    <div class="ival" id="v5">0</div>
+  </div>
+</div>
+
+<div class="score-section">
+  <div class="score-top">
+    <div><div class="score-lbl">BVC 總分</div><div><span class="score-big cg" id="total">0</span><span class="score-max"> / 6</span></div></div>
+    <div class="risk-lbl cg" id="risk-lbl">低風險</div>
+  </div>
+  <div class="meter"><div class="fill bg" id="fill" style="width:0%"></div></div>
+  <div class="dot-row">
+    <div class="dot" id="d0">1</div><div class="dot" id="d1">2</div><div class="dot" id="d2">3</div>
+    <div class="dot" id="d3">4</div><div class="dot" id="d4">5</div><div class="dot" id="d5">6</div>
+  </div>
+</div>
+
+<div class="alert al" id="alert">
+  <div class="alert-title" id="atitle">🟢 低風險 — 繼續常規監測</div>
+  <ul class="alert-list" id="alist">
+    <li>每班評估一次</li>
+    <li>維持常規照護與觀察</li>
+    <li>建立良好治療關係，記錄基準行為</li>
+  </ul>
+</div>
+
+<div class="nwrap">
+  <div class="nh">護理紀錄 / 備註</div>
+  <textarea placeholder="記錄觀察到的具體行為、觸發因素、已採取的措施…"></textarea>
+</div>
+
+<div class="btns">
+  <button class="btn bs" id="btn-reset">🔄 清除重填</button>
+  <button class="btn bp" onclick="window.print()">🖨️ 列印 / 儲存</button>
+</div>
+<div class="ts" id="ts"></div>
+
+<script>
+(function(){
+  var scores = [0,0,0,0,0,0];
+
+  function update(){
+    var total = scores.reduce(function(a,b){return a+b;},0);
+    var t=document.getElementById('total');
+    var f=document.getElementById('fill');
+    var r=document.getElementById('risk-lbl');
+    var a=document.getElementById('alert');
+    var at=document.getElementById('atitle');
+    var al=document.getElementById('alist');
+
+    t.textContent=total;
+    f.style.width=(total/6*100)+'%';
+
+    if(total===0){
+      t.className='score-big cg';f.className='fill bg';r.className='risk-lbl cg';r.textContent='低風險';
+      a.className='alert al';at.textContent='🟢 低風險 — 繼續常規監測';
+      al.innerHTML='<li>每班評估一次</li><li>維持常規照護與觀察</li><li>建立良好治療關係，記錄基準行為</li>';
+    } else if(total===1){
+      t.className='score-big ca';f.className='fill ba';r.className='risk-lbl ca';r.textContent='輕度風險';
+      a.className='alert am';at.textContent='🟡 輕度風險 — 提高警覺';
+      al.innerHTML='<li>加強觀察頻率</li><li>備妥去激化溝通策略</li><li>進入病房保持安全距離與站位意識</li><li>通知主責醫師，評估藥物調整</li>';
+    } else if(total<=3){
+      t.className='score-big ca';f.className='fill ba';r.className='risk-lbl ca';r.textContent='中度風險';
+      a.className='alert am';at.textContent='🟡 中度風險（≥2）— 立即採取預防措施';
+      al.innerHTML='<li>每4小時重新評估</li><li>電子病歷標記，通知主責醫師</li><li>去激化：語調平靜、保持安全距離、同理傾聽</li><li>進入病房前告知團隊，避免單人進入</li><li>調整環境：降低噪音、柔和燈光、減少刺激</li><li>評估是否需藥物調整（鎮靜／止痛）</li>';
+    } else {
+      t.className='score-big cr';f.className='fill br';r.className='risk-lbl cr';r.textContent='高風險';
+      a.className='alert ah';at.textContent='🔴 高風險（≥4）— 立即採取緊急措施';
+      al.innerHTML='<li>立即通報主責醫師及護理長</li><li>考慮啟動 BERT（行為緊急應變小組）</li><li>採雙人／多人照護，禁止單人進入</li><li>病房門口張貼高風險警示標誌</li><li>評估保護性約束必要性，依醫囑執行</li><li>確保站位靠近出口</li><li>排查可逆原因：譫妄、低血糖、缺氧、疼痛、藥物副作用</li><li>填寫不良事件通報表</li>';
+    }
+
+    for(var i=0;i<6;i++) document.getElementById('d'+i).className=scores[i]?'dot on':'dot';
+    document.getElementById('ts').textContent='評估時間：'+new Date().toLocaleString('zh-TW');
+  }
+
+  document.getElementById('bvc-list').addEventListener('click',function(e){
+    var item=e.target.closest('.item[data-i]');
+    if(!item) return;
+    var i=parseInt(item.dataset.i,10);
+    scores[i]=scores[i]?0:1;
+    item.classList.toggle('on',scores[i]===1);
+    document.getElementById('v'+i).textContent=scores[i];
+    update();
+  });
+
+  document.getElementById('btn-reset').addEventListener('click',function(){
+    if(!confirm('確定要清除所有資料？')) return;
+    scores=[0,0,0,0,0,0];
+    document.querySelectorAll('.item[data-i]').forEach(function(el){el.classList.remove('on');});
+    for(var i=0;i<6;i++) document.getElementById('v'+i).textContent='0';
+    document.getElementById('edate').value=new Date().toISOString().split('T')[0];
+    ['pname','nurse','shift'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el.tagName==='SELECT') el.selectedIndex=0; else el.value='';
+    });
+    update();
+  });
+
+  document.getElementById('edate').value=new Date().toISOString().split('T')[0];
+  update();
+})();
+</script>
+</body>
+</html>
